@@ -5,27 +5,23 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"slices"
 
 	"github.com/findy-network/findy-agent-auth/acator/authn"
-	"github.com/findy-network/findy-common-go/utils"
 	"github.com/golang/glog"
 	"github.com/lainio/err2"
 	"github.com/lainio/err2/try"
 )
 
 func main() {
-	// we use err2's std log and route it to our glog outputs.
-	glog.CopyStandardLogTo("ERROR")
+	os.Args = slices.Insert(os.Args, 1, "-logtostderr") // 1 -> first flag
+	glog.CopyStandardLogTo("ERROR")                     // err2 -> glog.ErrorX
+	defer err2.Catch(err2.Stderr)
 
-	defer err2.Catch() // this'll write errors to our glog automatically.
-
-	try.To(startServerCmd.Parse(os.Args[1:]))
-	utils.ParseLoggingArgs(loggingFlags)
-	if panicTrace {
-		err2.SetPanicTracer(os.Stderr)
-	}
-	if errTrace {
-		err2.SetErrorTracer(os.Stderr)
+	flag.Usage = usage
+	flag.Parse()
+	if flag.CommandLine.Arg(0) == "auth" {
+		try.To(startServerCmd.Parse(flag.Args()[1:]))
 	}
 
 	jsonAPI := false
@@ -41,6 +37,7 @@ func main() {
 	}
 
 	if dryRun {
+		try.To(authnCmd.Validate())
 		fmt.Println(string(try.To1(json.MarshalIndent(authnCmd, "", "\t"))))
 		return
 	}
@@ -54,11 +51,16 @@ func main() {
 	}
 }
 
-var (
-	errTrace, panicTrace bool
+func usage() {
+	fmt.Fprintf(flag.CommandLine.Output(), "Usage: ")
+	fmt.Fprintf(flag.CommandLine.Output(), "fido-call [-common-flags] auth [-cmd-flags]\n")
+	fmt.Fprintf(flag.CommandLine.Output(), "  auth cmd calls the server's WebAuthn API\n\n")
+	fmt.Fprintf(flag.CommandLine.Output(), "common-flags:\n")
+	flag.PrintDefaults()
+}
 
+var (
 	dryRun         bool
-	loggingFlags   string
 	startServerCmd = flag.NewFlagSet("server", flag.ExitOnError)
 
 	authnCmd = authn.Cmd{
@@ -98,11 +100,6 @@ var (
 )
 
 func init() {
-	startServerCmd.BoolVar(&errTrace, "et", false, "enables error stack tracing")
-	startServerCmd.BoolVar(&panicTrace, "pt", false, "enables panic stack tracing")
-
-	startServerCmd.StringVar(&loggingFlags, "logging", "-logtostderr=true -v=2",
-		"logging startup arguments")
 	startServerCmd.StringVar(&authnCmd.URL, "url", authnCmd.URL, "web authn server url")
 	startServerCmd.StringVar(&authnCmd.CookieFile, "cookies", authnCmd.CookieFile,
 		"cookies to store between calls")
