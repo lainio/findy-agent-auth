@@ -69,28 +69,30 @@ var (
 		CookiePath: "",
 		URL:        "http://localhost:8090",
 
-		RegisterBegin: authn.Endpoint{
-			Method:  "GET",
-			Path:    "%s/register/begin/%s?seed=%s",
-			Payload: "",
-		},
-
-		RegisterFinish: authn.Endpoint{
-			Method:  "POST",
-			Path:    "%s/register/finish/%s",
-			Payload: "",
-		},
-
 		LoginBegin: authn.Endpoint{
-			Method:  "GET",
-			Path:    "%s/login/begin/%s",
-			Payload: "",
+			Method:   "POST",
+			Path:     "%s/assertion/options",
+			Payload:  `{"username":"%s"}`,
+			MiddlePL: `{"publicKey": %s}`,
 		},
 
 		LoginFinish: authn.Endpoint{
 			Method:  "POST",
-			Path:    "%s/login/finish/%s",
-			Payload: "",
+			Path:    "%s/assertion/result",
+			Payload: ``,
+		},
+
+		RegisterBegin: authn.Endpoint{
+			Method:   "POST",
+			Path:     "%s/attestation/options",
+			Payload:  `{"username":"%s"}`,
+			MiddlePL: `{"publicKey": %s}`,
+		},
+
+		RegisterFinish: authn.Endpoint{
+			Method:  "POST",
+			Path:    "%s/attestation/result",
+			Payload: ``,
 		},
 
 		AAGUID:  "12c85a48-4baf-47bd-b51f-f192871a1511",
