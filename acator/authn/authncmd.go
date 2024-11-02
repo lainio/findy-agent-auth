@@ -60,11 +60,12 @@ type Endpoint struct {
 }
 
 func (ac *Cmd) Validate() (err error) {
+	defer assert.PushAsserter(assert.Plain)()
 	defer err2.Handle(&err)
 
 	assert.NotEmpty(ac.SubCmd, "sub command needed")
 	assert.That(ac.SubCmd == "register" || ac.SubCmd == "login",
-		"wrong sub command: %s: want: register|login", ac.SubCmd)
+		"wrong sub command '%s', want register|login", ac.SubCmd)
 	assert.NotEmpty(ac.UserName, "user name needed")
 	assert.NotEmpty(ac.URL, "connection url cannot be empty")
 	assert.NotEmpty(ac.AAGUID, "authenticator ID needed")
