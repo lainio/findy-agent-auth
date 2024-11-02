@@ -1,10 +1,14 @@
 #!/bin/bash
 
 url=${FCLI_URL:-"http://localhost:3000"}
-lvl=${lvl:-"-logtostderr=false -v=0"}
+lvl=${lvl:-"-v=0"}
+glb=${glb:-""} # globals like -err2-trace, ...
 
-go run main.go -url "$url" \
-	-logging "$lvl" \
+go run main.go \
+	$lvl \
+	$glb \
+ \
+	auth -url "$url" \
  \
 	-log-begin-met 'POST' \
 	-log-begin '%s/assertion/options' \

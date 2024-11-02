@@ -62,10 +62,14 @@ else # these are for webauthn.io
 fi
 
 url=${FCLI_URL:-"https://webauthn.io"}
-lvl=${lvl:-"-logtostderr -v=0"} # e.g. -v=5, when 5<= payloads are echoed
+lvl=${lvl:-"-v=0"} # e.g. -v=5, when 5<= payloads are echoed
+glb=${glb:-""} # globals like -err2-trace, ...
 
-go run main.go -url "$url" \
-	-logging "$lvl" \
+go run main.go \
+	$lvl \
+	$glb \
+ \
+	auth -url "$url" \
 	-log-begin-met "$log_begin_met" \
 	-log-begin "$log_begin" \
 	-log-finish "$log_finish" \
