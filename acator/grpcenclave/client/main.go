@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -21,9 +22,6 @@ import (
 )
 
 var (
-	// TODO: dart playground
-	// cert       = flag.String("cert", "../../../scripts/test-cert/", "TLS cert path")
-
 	cert       = flag.String("cert", "../../../../findy-agent/grpc/cert", "pki cert path")
 	cmd        = flag.String("cmd", "login", "FIDO2 cmd: login/register")
 	user       = flag.String("user", "elli", "test user name")
@@ -49,9 +47,7 @@ var (
 // agency running as well.
 
 func main() {
-	os.Args = append(os.Args,
-		"-logtostderr",
-	)
+	os.Args = slices.Insert(os.Args, 1, "-logtostderr") // 1 -> first flag
 	defer err2.Catch()
 
 	flag.Parse()
@@ -126,7 +122,7 @@ func verify(status *pb.CmdStatus) {
 		func(kh enclave.KeyHandle, data ...[]byte) (d []byte, s []byte, err error) {
 			ok := kh.Verify(data[0], data[1])
 			if !ok {
-				err = fmt.Errorf("cannot verify singnature")
+				err = errors.New("cannot verify singnature")
 			}
 			return
 		})
@@ -185,7 +181,7 @@ func isKeyHandle(secEnc *enclave.Enclave, status *pb.CmdStatus) {
 			},
 		}
 	} else {
-		smsg = newErrEnter(fmt.Errorf("error"), "not key handle", status)
+		smsg = newErrEnter(errors.New("error"), "not key handle", status)
 	}
 	try.To1(rpcclient.DoEnterSecret(conn, smsg))
 }
