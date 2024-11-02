@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -116,7 +117,7 @@ loop:
 }
 
 func handleStatusErr(status *pb.CmdStatus) {
-	smsg := newErrEnter(fmt.Errorf(status.GetErr()), "not key handle", status)
+	smsg := newErrEnter(errors.New(status.GetErr()), "not key handle", status)
 	try.To1(rpcclient.DoEnterSecret(conn, smsg))
 }
 
