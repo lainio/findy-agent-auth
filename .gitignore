@@ -15,11 +15,12 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
+.work/
+
 # Build tool specifics
 .idea
 .vscode
 *.vim
-go.work*
 
 # Environment variables
 .envrc
